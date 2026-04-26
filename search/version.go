@@ -14,7 +14,6 @@ const VersionFile = "version.json"
 type Version struct {
 	Tag           string `json:"tag"`
 	RBIUpdateDate string `json:"rbi_update_date"`
-	IndexedDocs   int    `json:"indexed_docs"`
 	BuiltAt       string `json:"built_at"`
 }
 

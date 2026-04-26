@@ -40,47 +40,47 @@ func main() {
 		*csvPath = downloaded
 		*tag = releaseTag
 
-		if err := buildIndexFromCSV(*csvPath, *indexDir); err != nil {
+		count, err := buildIndexFromCSV(*csvPath, *indexDir)
+		if err != nil {
 			log.Fatalf("build index: %v", err)
 		}
 		v := search.Version{
 			Tag:           releaseTag,
 			RBIUpdateDate: rbiDate,
-			IndexedDocs:   countDocs(*indexDir),
 			BuiltAt:       time.Now().UTC().Format(time.RFC3339),
 		}
 		if err := v.Save(*indexDir); err != nil {
 			log.Fatalf("save version: %v", err)
 		}
-		log.Printf("built index for %s (%d docs)", releaseTag, v.IndexedDocs)
+		log.Printf("built index for %s (%d docs)", releaseTag, count)
 		return
 	}
 
-	if err := buildIndexFromCSV(*csvPath, *indexDir); err != nil {
+	count, err := buildIndexFromCSV(*csvPath, *indexDir)
+	if err != nil {
 		log.Fatalf("build index: %v", err)
 	}
 	v := search.Version{
-		Tag:         *tag,
-		IndexedDocs: countDocs(*indexDir),
-		BuiltAt:     time.Now().UTC().Format(time.RFC3339),
+		Tag:     *tag,
+		BuiltAt: time.Now().UTC().Format(time.RFC3339),
 	}
 	if err := v.Save(*indexDir); err != nil {
 		log.Fatalf("save version: %v", err)
 	}
-	log.Printf("built index from %s (%d docs)", *csvPath, v.IndexedDocs)
+	log.Printf("built index from %s (%d docs)", *csvPath, count)
 }
 
-func buildIndexFromCSV(csvPath, indexDir string) error {
+func buildIndexFromCSV(csvPath, indexDir string) (int, error) {
 	if err := os.RemoveAll(indexDir); err != nil {
-		return fmt.Errorf("clean %s: %w", indexDir, err)
+		return 0, fmt.Errorf("clean %s: %w", indexDir, err)
 	}
 	if err := os.MkdirAll(filepath.Dir(indexDir), 0755); err != nil {
-		return fmt.Errorf("mkdir parent: %w", err)
+		return 0, fmt.Errorf("mkdir parent: %w", err)
 	}
 
 	f, err := os.Open(csvPath)
 	if err != nil {
-		return fmt.Errorf("open %s: %w", csvPath, err)
+		return 0, fmt.Errorf("open %s: %w", csvPath, err)
 	}
 	defer f.Close()
 
@@ -89,16 +89,16 @@ func buildIndexFromCSV(csvPath, indexDir string) error {
 
 	header, err := r.Read()
 	if err != nil {
-		return fmt.Errorf("read header: %w", err)
+		return 0, fmt.Errorf("read header: %w", err)
 	}
 	cols, err := search.NewColumnIndex(header)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	idx, err := bleve.New(indexDir, search.NewIndexMapping())
 	if err != nil {
-		return fmt.Errorf("create index: %w", err)
+		return 0, fmt.Errorf("create index: %w", err)
 	}
 	defer idx.Close()
 
@@ -110,7 +110,7 @@ func buildIndexFromCSV(csvPath, indexDir string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("read row: %w", err)
+			return 0, fmt.Errorf("read row: %w", err)
 		}
 		b, err := search.BranchFromCSVRow(cols, row)
 		if err != nil {
@@ -118,32 +118,22 @@ func buildIndexFromCSV(csvPath, indexDir string) error {
 			continue
 		}
 		if err := batch.Index(b.IFSC, b); err != nil {
-			return fmt.Errorf("index %s: %w", b.IFSC, err)
+			return 0, fmt.Errorf("index %s: %w", b.IFSC, err)
 		}
 		count++
 		if count%batchSize == 0 {
 			if err := idx.Batch(batch); err != nil {
-				return fmt.Errorf("commit batch: %w", err)
+				return 0, fmt.Errorf("commit batch: %w", err)
 			}
 			batch = idx.NewBatch()
 		}
 	}
 	if batch.Size() > 0 {
 		if err := idx.Batch(batch); err != nil {
-			return fmt.Errorf("commit final batch: %w", err)
+			return 0, fmt.Errorf("commit final batch: %w", err)
 		}
 	}
-	return nil
-}
-
-func countDocs(indexDir string) int {
-	idx, err := bleve.Open(indexDir)
-	if err != nil {
-		return 0
-	}
-	defer idx.Close()
-	n, _ := idx.DocCount()
-	return int(n)
+	return count, nil
 }
 
 type ghRelease struct {

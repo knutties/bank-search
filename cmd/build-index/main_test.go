@@ -14,7 +14,7 @@ func TestBuildIndexFromCSV_RoundTripsAllRows(t *testing.T) {
 	csvPath := filepath.Join("testdata", "sample.csv")
 	indexDir := filepath.Join(t.TempDir(), "index")
 
-	err := buildIndexFromCSV(csvPath, indexDir)
+	_, err := buildIndexFromCSV(csvPath, indexDir)
 	require.NoError(t, err)
 
 	s, err := search.OpenIndex(indexDir)
@@ -31,6 +31,6 @@ func TestBuildIndexFromCSV_RejectsBadHeader(t *testing.T) {
 	csvPath := filepath.Join(t.TempDir(), "bad.csv")
 	require.NoError(t, os.WriteFile(csvPath,
 		[]byte("FOO,BAR\n1,2\n"), 0644))
-	err := buildIndexFromCSV(csvPath, filepath.Join(t.TempDir(), "idx"))
+	_, err := buildIndexFromCSV(csvPath, filepath.Join(t.TempDir(), "idx"))
 	assert.Error(t, err)
 }

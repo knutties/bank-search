@@ -26,7 +26,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 	t.Cleanup(func() { _ = s.Close() })
 
 	srv := httptest.NewServer(newRouter(s, search.Version{
-		Tag: "test", IndexedDocs: 3, BuiltAt: "2026-04-26T00:00:00Z"}))
+		Tag: "test", BuiltAt: "2026-04-26T00:00:00Z"}))
 	t.Cleanup(srv.Close)
 	return srv
 }
