@@ -1,0 +1,87 @@
+package main
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/razorpay/ifsc/v2/ifsc-api/search"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func newTestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	branches := []*search.Branch{
+		{IFSC: "HDFC0000001", BankCode: "HDFC", BankName: "HDFC Bank",
+			Branch: "ANDHERI WEST", City: "MUMBAI", State: "MAHARASHTRA"},
+		{IFSC: "HDFC0000002", BankCode: "HDFC", BankName: "HDFC Bank",
+			Branch: "BANDRA", City: "MUMBAI", State: "MAHARASHTRA"},
+		{IFSC: "ICIC0000001", BankCode: "ICIC", BankName: "ICICI Bank",
+			Branch: "ANDHERI EAST", City: "MUMBAI", State: "MAHARASHTRA"},
+	}
+	s, err := search.NewMemorySearcher(branches)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = s.Close() })
+
+	srv := httptest.NewServer(newRouter(s, search.Version{
+		Tag: "test", IndexedDocs: 3, BuiltAt: "2026-04-26T00:00:00Z"}))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
+func TestHandleSearch_BankAndQuery(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/search?bank=HDFC&q=andheri")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body search.SearchResults
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, 1, body.Total)
+	assert.Equal(t, "HDFC0000001", body.Results[0].IFSC)
+}
+
+func TestHandleSearch_MissingParams_400(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/search")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var body map[string]string
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Contains(t, body["error"], "at least one of bank or q is required")
+}
+
+func TestHandleSearch_NegativeOffset_400(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/search?q=andheri&offset=-1")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func TestHandleSearch_NonIntegerLimit_400(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/search?q=andheri&limit=abc")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func TestHandleHealthz(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/healthz")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body map[string]interface{}
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, "ok", body["status"])
+	assert.Equal(t, float64(3), body["indexed_docs"])
+	assert.Equal(t, "test", body["release_tag"])
+}
