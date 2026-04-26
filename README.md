@@ -19,6 +19,8 @@ The index lands in `ifsc-api/index/` (gitignored) along with `version.json`.
 ```bash
 make run-search
 # IFSC_SEARCH_PORT and IFSC_SEARCH_INDEX_PATH override defaults
+# PATH_PREFIX mounts all routes under a sub-path, e.g. PATH_PREFIX=/ifsc
+# exposes /ifsc/search and /ifsc/healthz
 ```
 
 ## API
@@ -38,6 +40,15 @@ Example:
 
 ```bash
 curl 'http://localhost:8080/search?bank=HDFC&q=andheri+west&limit=5'
+```
+
+### `GET /ifsc/{code}`
+
+Returns the full branch JSON for a given IFSC code, or 404 if unknown.
+Mirrors the URL shape of the hosted `https://ifsc.razorpay.com/{code}` API.
+
+```bash
+curl 'http://localhost:8080/ifsc/HDFC0CAGSBK'
 ```
 
 ### `GET /healthz`

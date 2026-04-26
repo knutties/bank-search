@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 func main() {
 	port := envOr("IFSC_SEARCH_PORT", "8080")
 	indexPath := envOr("IFSC_SEARCH_INDEX_PATH", "./ifsc-api/index")
+	prefix := normalizePrefix(os.Getenv("PATH_PREFIX"))
 
 	searcher, err := search.OpenIndex(indexPath)
 	if err != nil {
@@ -32,14 +34,14 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         ":" + port,
-		Handler:      newRouter(searcher, version),
+		Handler:      newRouter(searcher, version, prefix),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
 	go func() {
-		log.Printf("ifsc-search listening on :%s (index=%s, docs=%d)",
-			port, indexPath, searcher.DocCount())
+		log.Printf("ifsc-search listening on :%s (index=%s, docs=%d, prefix=%q)",
+			port, indexPath, searcher.DocCount(), prefix)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %v", err)
 		}
@@ -61,11 +63,23 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
-func newRouter(s search.Searcher, v search.Version) http.Handler {
+func newRouter(s search.Searcher, v search.Version, prefix string) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/search", handleSearch(s))
-	mux.HandleFunc("/healthz", handleHealthz(s, v))
+	mux.HandleFunc(prefix+"/search", handleSearch(s))
+	mux.HandleFunc(prefix+"/healthz", handleHealthz(s, v))
+	mux.HandleFunc("GET "+prefix+"/ifsc/{code}", handleLookup(s))
 	return mux
+}
+
+// normalizePrefix returns "" for empty input, otherwise ensures a single
+// leading "/" and no trailing "/". e.g. "ifsc/" -> "/ifsc", "/" -> "".
+func normalizePrefix(p string) string {
+	p = strings.TrimSpace(p)
+	p = strings.Trim(p, "/")
+	if p == "" {
+		return ""
+	}
+	return "/" + p
 }
 
 func handleSearch(s search.Searcher) http.HandlerFunc {
@@ -115,6 +129,23 @@ func parseRequest(r *http.Request) (search.SearchRequest, error) {
 		req.Offset = n
 	}
 	return req, nil
+}
+
+func handleLookup(s search.Searcher) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := r.PathValue("code")
+		br, err := s.Lookup(code)
+		if err != nil {
+			if errors.Is(err, search.ErrNotFound) {
+				writeError(w, http.StatusNotFound, "ifsc code not found")
+				return
+			}
+			log.Printf("lookup error: %v", err)
+			writeError(w, http.StatusInternalServerError, "internal error")
+			return
+		}
+		writeJSON(w, http.StatusOK, br)
+	}
 }
 
 func handleHealthz(s search.Searcher, v search.Version) http.HandlerFunc {

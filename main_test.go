@@ -26,7 +26,7 @@ func newTestServer(t *testing.T) *httptest.Server {
 	t.Cleanup(func() { _ = s.Close() })
 
 	srv := httptest.NewServer(newRouter(s, search.Version{
-		Tag: "test", BuiltAt: "2026-04-26T00:00:00Z"}))
+		Tag: "test", BuiltAt: "2026-04-26T00:00:00Z"}, ""))
 	t.Cleanup(srv.Close)
 	return srv
 }
@@ -84,4 +84,84 @@ func TestHandleHealthz(t *testing.T) {
 	assert.Equal(t, "ok", body["status"])
 	assert.Equal(t, float64(3), body["indexed_docs"])
 	assert.Equal(t, "test", body["release_tag"])
+}
+
+func TestHandleLookup_Found(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/ifsc/HDFC0000001")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body search.Branch
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, "HDFC0000001", body.IFSC)
+	assert.Equal(t, "ANDHERI WEST", body.Branch)
+}
+
+func TestHandleLookup_NotFound(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/ifsc/ZZZZ0000000")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+func TestHandleLookup_MethodNotAllowed(t *testing.T) {
+	srv := newTestServer(t)
+	req, err := http.NewRequest(http.MethodPost, srv.URL+"/ifsc/HDFC0000001", nil)
+	require.NoError(t, err)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
+}
+
+func TestRouter_PathPrefix(t *testing.T) {
+	branches := []*search.Branch{
+		{IFSC: "HDFC0000001", BankCode: "HDFC", BankName: "HDFC Bank",
+			Branch: "ANDHERI WEST", City: "MUMBAI", State: "MAHARASHTRA"},
+	}
+	s, err := search.NewMemorySearcher(branches)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = s.Close() })
+
+	srv := httptest.NewServer(newRouter(s, search.Version{Tag: "test"}, "/ifsc"))
+	t.Cleanup(srv.Close)
+
+	resp, err := http.Get(srv.URL + "/ifsc/search?bank=HDFC&q=andheri")
+	require.NoError(t, err)
+	resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	resp, err = http.Get(srv.URL + "/ifsc/healthz")
+	require.NoError(t, err)
+	resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	resp, err = http.Get(srv.URL + "/ifsc/ifsc/HDFC0000001")
+	require.NoError(t, err)
+	resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	resp, err = http.Get(srv.URL + "/search?bank=HDFC&q=andheri")
+	require.NoError(t, err)
+	resp.Body.Close()
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+}
+
+func TestNormalizePrefix(t *testing.T) {
+	cases := map[string]string{
+		"":         "",
+		"/":        "",
+		"ifsc":     "/ifsc",
+		"/ifsc":    "/ifsc",
+		"/ifsc/":   "/ifsc",
+		"ifsc/v1":  "/ifsc/v1",
+		"/ifsc/v1": "/ifsc/v1",
+		"  /api ":  "/api",
+	}
+	for in, want := range cases {
+		assert.Equal(t, want, normalizePrefix(in), "input=%q", in)
+	}
 }

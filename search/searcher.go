@@ -10,6 +10,7 @@ import (
 // and the in-memory test helper satisfy it.
 type Searcher interface {
 	Search(req SearchRequest) (*SearchResults, error)
+	Lookup(code string) (*Branch, error)
 	DocCount() uint64
 	Close() error
 }

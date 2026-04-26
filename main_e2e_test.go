@@ -28,7 +28,7 @@ func TestEndToEnd_CSVThroughHTTP(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = s.Close() })
 
-	srv := httptest.NewServer(newRouter(s, search.Version{Tag: "test"}))
+	srv := httptest.NewServer(newRouter(s, search.Version{Tag: "test"}, ""))
 	t.Cleanup(srv.Close)
 
 	resp, err := http.Get(srv.URL + "/search?bank=HDFC&q=andheri")
