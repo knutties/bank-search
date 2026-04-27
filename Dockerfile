@@ -13,9 +13,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" \
-        -o /out/ifsc-search ./ifsc-api && \
+        -o /out/ifsc-search . && \
     CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" \
-        -o /out/build-index ./ifsc-api/cmd/build-index
+        -o /out/build-index ./cmd/build-index
 
 FROM build AS indexer
 ARG IFSC_TAG

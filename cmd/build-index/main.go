@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/razorpay/ifsc/v2/ifsc-api/search"
+	"github.com/knutties/ifsc-search/search"
 )
 
 const (

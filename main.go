@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/razorpay/ifsc/v2/ifsc-api/search"
+	"github.com/knutties/ifsc-search/search"
 )
 
 func main() {

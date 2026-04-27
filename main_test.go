@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/razorpay/ifsc/v2/ifsc-api/search"
+	"github.com/knutties/ifsc-search/search"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

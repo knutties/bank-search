@@ -12,15 +12,15 @@ make build-index                      # downloads latest release CSV
 make build-index-from CSV=./IFSC.csv  # uses a local CSV
 ```
 
-The index lands in `ifsc-api/index/` (gitignored) along with `version.json`.
+The index lands in `./index/` (gitignored) along with `version.json`.
 
 ## Run the server
 
 ```bash
-make run-search
+make run
 # IFSC_SEARCH_PORT and IFSC_SEARCH_INDEX_PATH override defaults
 # PATH_PREFIX mounts all routes under a sub-path, e.g. PATH_PREFIX=/ifsc
-# exposes /ifsc/search and /ifsc/healthz
+# exposes /ifsc/search, /ifsc/healthz, and /ifsc/ifsc/{code}
 ```
 
 ## API
@@ -58,5 +58,12 @@ Returns the index version metadata and document count.
 ## Tests
 
 ```bash
-make ifsc-api-test
+make test
 ```
+
+## Container image
+
+A multi-stage `Dockerfile` at the repo root builds a distroless image that
+ships `ifsc-search` plus a pre-baked Bleve index. The
+`.github/workflows/image.yml` workflow_dispatch publishes images to
+`ghcr.io/knutties/ifsc-search`.
