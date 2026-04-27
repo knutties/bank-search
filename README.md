@@ -86,3 +86,24 @@ A multi-stage `Dockerfile` at the repo root builds a distroless image that
 ships `ifsc-search` plus a pre-baked Bleve index. The
 `.github/workflows/image.yml` workflow_dispatch publishes images to
 `ghcr.io/knutties/ifsc-search`.
+
+### Run with Docker
+
+```bash
+docker run --rm -p 8080:8080 ghcr.io/knutties/ifsc-search:latest
+curl 'http://localhost:8080/healthz'
+```
+
+Mount under a sub-path with `PATH_PREFIX`:
+
+```bash
+docker run --rm -p 8080:8080 -e PATH_PREFIX=/ifsc \
+    ghcr.io/knutties/ifsc-search:latest
+```
+
+Build and run locally instead of pulling:
+
+```bash
+docker build -t ifsc-search .
+docker run --rm -p 8080:8080 ifsc-search
+```
