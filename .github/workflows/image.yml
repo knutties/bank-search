@@ -38,7 +38,9 @@ jobs:
           provenance: false
           build-args: |
             IFSC_TAG=${{ inputs.ifsc_tag }}
-          tags: ghcr.io/knutties/ifsc-search:${{ steps.ver.outputs.tag }}
+          tags: |
+            ghcr.io/knutties/ifsc-search:${{ steps.ver.outputs.tag }}
+            ghcr.io/knutties/ifsc-search:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
