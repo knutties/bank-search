@@ -40,6 +40,7 @@ jobs:
           [ "$ready" = "1" ] || { echo "server did not become ready"; exit 1; }
 
           curl -sf http://localhost:18080/healthz | grep -q '"status":"ok"'
+          curl -sf http://localhost:18080/status | grep -q '"indexed_docs":'
           curl -sf 'http://localhost:18080/search?bank=HDFC&q=andheri' | grep -q HDFC0000001
           curl -sf http://localhost:18080/list | grep -q '"bank_code":"HDFC"'
           curl -sf http://localhost:18080/list | grep -q '"bank_code":"SBIN"'

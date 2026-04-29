@@ -24,7 +24,7 @@ Builds the binary locally and serves the index in `./index/`:
 make run
 # IFSC_SEARCH_PORT and IFSC_SEARCH_INDEX_PATH override defaults
 # PATH_PREFIX mounts all routes under a sub-path, e.g. PATH_PREFIX=/ifsc
-# exposes /ifsc/search, /ifsc/healthz, /ifsc/list, and /ifsc/ifsc/{code}
+# exposes /ifsc/search, /ifsc/healthz, /ifsc/status, /ifsc/list, and /ifsc/ifsc/{code}
 ```
 
 ### From the published GHCR image
@@ -100,7 +100,20 @@ curl 'http://localhost:8080/ifsc/HDFC0CAGSBK'
 
 ### `GET /healthz`
 
+Lightweight liveness probe. Returns `{"status": "ok"}` and nothing else —
+safe to wire into load-balancer health checks without leaking build metadata.
+
+```bash
+curl 'http://localhost:8080/healthz'
+```
+
+### `GET /status`
+
 Returns the index version metadata and document count.
+
+```bash
+curl 'http://localhost:8080/status'
+```
 
 ## Tests
 
