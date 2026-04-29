@@ -88,7 +88,7 @@ func TestHandleHealthz(t *testing.T) {
 
 func TestHandleListBanks(t *testing.T) {
 	srv := newTestServer(t)
-	resp, err := http.Get(srv.URL + "/banks")
+	resp, err := http.Get(srv.URL + "/list")
 	require.NoError(t, err)
 	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)

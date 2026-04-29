@@ -67,7 +67,7 @@ func newRouter(s search.Searcher, v search.Version, prefix string) http.Handler 
 	mux := http.NewServeMux()
 	mux.HandleFunc(prefix+"/search", handleSearch(s))
 	mux.HandleFunc(prefix+"/healthz", handleHealthz(s, v))
-	mux.HandleFunc("GET "+prefix+"/banks", handleListBanks(s))
+	mux.HandleFunc("GET "+prefix+"/list", handleListBanks(s))
 	mux.HandleFunc("GET "+prefix+"/ifsc/{code}", handleLookup(s))
 	return mux
 }
