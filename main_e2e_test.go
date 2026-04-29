@@ -57,7 +57,7 @@ func TestEndToEnd_CSVThroughHTTP(t *testing.T) {
 	})
 
 	t.Run("banks", func(t *testing.T) {
-		resp, err := http.Get(srv.URL + "/banks")
+		resp, err := http.Get(srv.URL + "/list")
 		require.NoError(t, err)
 		defer resp.Body.Close()
 		assert.Equal(t, http.StatusOK, resp.StatusCode)

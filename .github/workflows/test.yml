@@ -41,8 +41,8 @@ jobs:
 
           curl -sf http://localhost:18080/healthz | grep -q '"status":"ok"'
           curl -sf 'http://localhost:18080/search?bank=HDFC&q=andheri' | grep -q HDFC0000001
-          curl -sf http://localhost:18080/banks | grep -q '"bank_code":"HDFC"'
-          curl -sf http://localhost:18080/banks | grep -q '"bank_code":"SBIN"'
+          curl -sf http://localhost:18080/list | grep -q '"bank_code":"HDFC"'
+          curl -sf http://localhost:18080/list | grep -q '"bank_code":"SBIN"'
           curl -sf http://localhost:18080/ifsc/HDFC0000001 | grep -q "ANDHERI WEST"
 
           code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/ifsc/ZZZZ0000000)

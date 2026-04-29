@@ -24,7 +24,7 @@ Builds the binary locally and serves the index in `./index/`:
 make run
 # IFSC_SEARCH_PORT and IFSC_SEARCH_INDEX_PATH override defaults
 # PATH_PREFIX mounts all routes under a sub-path, e.g. PATH_PREFIX=/ifsc
-# exposes /ifsc/search, /ifsc/healthz, /ifsc/banks, and /ifsc/ifsc/{code}
+# exposes /ifsc/search, /ifsc/healthz, /ifsc/list, and /ifsc/ifsc/{code}
 ```
 
 ### From the published GHCR image
@@ -70,13 +70,13 @@ Example:
 curl 'http://localhost:8080/search?bank=HDFC&q=andheri+west&limit=5'
 ```
 
-### `GET /banks`
+### `GET /list`
 
 Returns the distinct list of banks present in the index, sorted by
 `bank_code`. The list is computed once on first request and cached.
 
 ```bash
-curl 'http://localhost:8080/banks'
+curl 'http://localhost:8080/list'
 ```
 
 ```json
