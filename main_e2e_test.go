@@ -52,6 +52,18 @@ func TestEndToEnd_CSVThroughHTTP(t *testing.T) {
 		var body map[string]interface{}
 		require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
 		assert.Equal(t, "ok", body["status"])
+		assert.Len(t, body, 1)
+	})
+
+	t.Run("status", func(t *testing.T) {
+		resp, err := http.Get(srv.URL + "/status")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var body map[string]interface{}
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+		assert.Equal(t, "ok", body["status"])
 		assert.Equal(t, float64(5), body["indexed_docs"])
 		assert.Equal(t, "test", body["release_tag"])
 	})

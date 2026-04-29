@@ -82,6 +82,19 @@ func TestHandleHealthz(t *testing.T) {
 	var body map[string]interface{}
 	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
 	assert.Equal(t, "ok", body["status"])
+	assert.Len(t, body, 1, "/healthz must return only {status: ok}")
+}
+
+func TestHandleStatus(t *testing.T) {
+	srv := newTestServer(t)
+	resp, err := http.Get(srv.URL + "/status")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var body map[string]interface{}
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
+	assert.Equal(t, "ok", body["status"])
 	assert.Equal(t, float64(3), body["indexed_docs"])
 	assert.Equal(t, "test", body["release_tag"])
 }

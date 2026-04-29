@@ -66,7 +66,8 @@ func envOr(key, fallback string) string {
 func newRouter(s search.Searcher, v search.Version, prefix string) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc(prefix+"/search", handleSearch(s))
-	mux.HandleFunc(prefix+"/healthz", handleHealthz(s, v))
+	mux.HandleFunc(prefix+"/healthz", handleHealthz())
+	mux.HandleFunc(prefix+"/status", handleStatus(s, v))
 	mux.HandleFunc("GET "+prefix+"/list", handleListBanks(s))
 	mux.HandleFunc("GET "+prefix+"/ifsc/{code}", handleLookup(s))
 	return mux
@@ -164,7 +165,13 @@ func handleListBanks(s search.Searcher) http.HandlerFunc {
 	}
 }
 
-func handleHealthz(s search.Searcher, v search.Version) http.HandlerFunc {
+func handleHealthz() http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	}
+}
+
+func handleStatus(s search.Searcher, v search.Version) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]interface{}{
 			"status":          "ok",
