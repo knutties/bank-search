@@ -1,0 +1,17 @@
+{
+    "version": "1.0",
+    "sources": ["models"],
+    "maven": {
+        "dependencies": [
+            "software.amazon.smithy:smithy-openapi:1.68.0"
+        ]
+    },
+    "plugins": {
+        "openapi": {
+            "service": "io.knutties.banksearch#BankSearch",
+            "protocol": "aws.protocols#restJson1",
+            "version": "3.1.0",
+            "tags": true
+        }
+    }
+}

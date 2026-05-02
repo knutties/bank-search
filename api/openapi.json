@@ -1,0 +1,488 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "BankSearch",
+        "version": "2026-05-02",
+        "description": "HTTP search service for Indian bank branches."
+    },
+    "paths": {
+        "/healthz": {
+            "get": {
+                "description": "Lightweight liveness probe for load balancers.",
+                "operationId": "Healthz",
+                "responses": {
+                    "200": {
+                        "description": "Healthz 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HealthzResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BadRequest 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ifsc/{code}": {
+            "get": {
+                "description": "Look up a single branch by IFSC code.",
+                "operationId": "GetBranch",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetBranch 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetBranchResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BadRequest 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "BranchNotFound 404 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BranchNotFoundResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/list": {
+            "get": {
+                "description": "List the distinct banks present in the index, sorted by bank_code.",
+                "operationId": "ListBanks",
+                "responses": {
+                    "200": {
+                        "description": "ListBanks 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListBanksResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BadRequest 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "get": {
+                "description": "Free-text plus structured search across the indexed branches.\nAt least one of {bank, q, ifsc, state, district, city} is required.",
+                "operationId": "Search",
+                "parameters": [
+                    {
+                        "name": "bank",
+                        "in": "query",
+                        "description": "4-char IFSC bank code or fuzzy bank name.",
+                        "schema": {
+                            "type": "string",
+                            "description": "4-char IFSC bank code or fuzzy bank name."
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Free-text query over branch, city, address and IFSC code prefix.",
+                        "schema": {
+                            "type": "string",
+                            "description": "Free-text query over branch, city, address and IFSC code prefix."
+                        }
+                    },
+                    {
+                        "name": "ifsc",
+                        "in": "query",
+                        "description": "Case-insensitive IFSC prefix, e.g. \"HDFC0CAG\".",
+                        "schema": {
+                            "type": "string",
+                            "description": "Case-insensitive IFSC prefix, e.g. \"HDFC0CAG\"."
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "Strict, case-insensitive state filter.",
+                        "schema": {
+                            "type": "string",
+                            "description": "Strict, case-insensitive state filter."
+                        }
+                    },
+                    {
+                        "name": "district",
+                        "in": "query",
+                        "description": "Strict, case-insensitive district filter.",
+                        "schema": {
+                            "type": "string",
+                            "description": "Strict, case-insensitive district filter."
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Strict, case-insensitive city filter.",
+                        "schema": {
+                            "type": "string",
+                            "description": "Strict, case-insensitive city filter."
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size; defaults to 20 and is clamped to 100.",
+                        "schema": {
+                            "type": "number",
+                            "description": "Page size; defaults to 20 and is clamped to 100."
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Result offset for pagination; defaults to 0.",
+                        "schema": {
+                            "type": "number",
+                            "description": "Result offset for pagination; defaults to 0."
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SearchResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BadRequest 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/status": {
+            "get": {
+                "description": "Index version metadata and document count.",
+                "operationId": "Status",
+                "responses": {
+                    "200": {
+                        "description": "Status 200 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatusResponseContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BadRequest 400 response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponseContent"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BadRequestResponseContent": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "Bank": {
+                "type": "object",
+                "properties": {
+                    "bank_code": {
+                        "type": "string"
+                    },
+                    "bank_name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "bank_code",
+                    "bank_name"
+                ]
+            },
+            "BranchNotFoundResponseContent": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ]
+            },
+            "GetBranchResponseContent": {
+                "type": "object",
+                "description": "Full branch record returned by GetBranch.",
+                "properties": {
+                    "ifsc": {
+                        "type": "string"
+                    },
+                    "bank_code": {
+                        "type": "string"
+                    },
+                    "bank_name": {
+                        "type": "string"
+                    },
+                    "branch": {
+                        "type": "string"
+                    },
+                    "centre": {
+                        "type": "string"
+                    },
+                    "district": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "contact": {
+                        "type": "string"
+                    },
+                    "micr": {
+                        "type": "string"
+                    },
+                    "swift": {
+                        "type": "string"
+                    },
+                    "upi": {
+                        "type": "boolean"
+                    },
+                    "neft": {
+                        "type": "boolean"
+                    },
+                    "rtgs": {
+                        "type": "boolean"
+                    },
+                    "imps": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "bank_code",
+                    "bank_name",
+                    "branch",
+                    "ifsc"
+                ]
+            },
+            "HealthzResponseContent": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "ListBanksResponseContent": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "number"
+                    },
+                    "banks": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Bank"
+                        }
+                    }
+                },
+                "required": [
+                    "banks",
+                    "total"
+                ]
+            },
+            "ResultItem": {
+                "type": "object",
+                "description": "A search hit: a Branch plus its relevance score.",
+                "properties": {
+                    "ifsc": {
+                        "type": "string"
+                    },
+                    "bank_code": {
+                        "type": "string"
+                    },
+                    "bank_name": {
+                        "type": "string"
+                    },
+                    "branch": {
+                        "type": "string"
+                    },
+                    "centre": {
+                        "type": "string"
+                    },
+                    "district": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "contact": {
+                        "type": "string"
+                    },
+                    "micr": {
+                        "type": "string"
+                    },
+                    "swift": {
+                        "type": "string"
+                    },
+                    "upi": {
+                        "type": "boolean"
+                    },
+                    "neft": {
+                        "type": "boolean"
+                    },
+                    "rtgs": {
+                        "type": "boolean"
+                    },
+                    "imps": {
+                        "type": "boolean"
+                    },
+                    "score": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "required": [
+                    "bank_code",
+                    "bank_name",
+                    "branch",
+                    "ifsc",
+                    "score"
+                ]
+            },
+            "SearchResponseContent": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "number"
+                    },
+                    "limit": {
+                        "type": "number"
+                    },
+                    "offset": {
+                        "type": "number"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ResultItem"
+                        }
+                    }
+                },
+                "required": [
+                    "limit",
+                    "offset",
+                    "results",
+                    "total"
+                ]
+            },
+            "StatusResponseContent": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string"
+                    },
+                    "indexed_docs": {
+                        "type": "number"
+                    },
+                    "release_tag": {
+                        "type": "string"
+                    },
+                    "rbi_update_date": {
+                        "type": "string"
+                    },
+                    "built_at": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            }
+        }
+    }
+}

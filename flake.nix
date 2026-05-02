@@ -18,6 +18,7 @@
             golangci-lint
             gh
             jq
+            smithy-cli
           ];
 
           shellHook = ''

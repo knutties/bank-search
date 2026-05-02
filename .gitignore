@@ -6,3 +6,6 @@
 result
 result-*
 .direnv/
+
+# Smithy build outputs (committed copies live under api/)
+smithy/build/
