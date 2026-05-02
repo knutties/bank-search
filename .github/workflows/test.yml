@@ -74,9 +74,12 @@ jobs:
           fi
           echo "smithy ok"
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: Build the TypeScript client
+        working-directory: clients/typescript
         run: |
           set -euo pipefail
-          cd clients/typescript
-          nix develop ../.. --command npm install --no-audit --no-fund
-          nix develop ../.. --command npm run build
+          npm install --no-audit --no-fund
+          npm run build
