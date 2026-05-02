@@ -20,7 +20,7 @@ import (
 
 func main() {
 	port := envOr("IFSC_SEARCH_PORT", "8080")
-	indexPath := envOr("IFSC_SEARCH_INDEX_PATH", "./ifsc-api/index")
+	indexPath := envOr("IFSC_SEARCH_INDEX_PATH", "./index")
 	prefix := normalizePrefix(os.Getenv("PATH_PREFIX"))
 
 	searcher, err := search.OpenIndex(indexPath)

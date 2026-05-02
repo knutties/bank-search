@@ -27,7 +27,7 @@ const (
 
 func main() {
 	tag := flag.String("tag", "", "release tag to use (default: latest)")
-	indexDir := flag.String("out", "ifsc-api/index", "output index directory")
+	indexDir := flag.String("out", "./index", "output index directory")
 	csvPath := flag.String("csv", "", "path to a local IFSC.csv (skips download)")
 	flag.Parse()
 
