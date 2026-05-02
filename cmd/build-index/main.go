@@ -27,7 +27,7 @@ const (
 
 func main() {
 	tag := flag.String("tag", "", "release tag to use (default: latest)")
-	indexDir := flag.String("out", "ifsc-api/index", "output index directory")
+	indexDir := flag.String("out", "./index", "output index directory")
 	csvPath := flag.String("csv", "", "path to a local IFSC.csv (skips download)")
 	flag.Parse()
 
@@ -117,7 +117,7 @@ func buildIndexFromCSV(csvPath, indexDir string) (int, error) {
 			log.Printf("skipping row: %v", err)
 			continue
 		}
-		if err := batch.Index(b.IFSC, b); err != nil {
+		if err := search.IndexBranch(batch, b); err != nil {
 			return 0, fmt.Errorf("index %s: %w", b.IFSC, err)
 		}
 		count++

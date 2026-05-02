@@ -20,7 +20,7 @@ import (
 
 func main() {
 	port := envOr("IFSC_SEARCH_PORT", "8080")
-	indexPath := envOr("IFSC_SEARCH_INDEX_PATH", "./ifsc-api/index")
+	indexPath := envOr("IFSC_SEARCH_INDEX_PATH", "./index")
 	prefix := normalizePrefix(os.Getenv("PATH_PREFIX"))
 
 	searcher, err := search.OpenIndex(indexPath)
@@ -176,8 +176,12 @@ func handleSearch(s search.Searcher) http.HandlerFunc {
 func parseRequest(r *http.Request) (search.SearchRequest, error) {
 	q := r.URL.Query()
 	req := search.SearchRequest{
-		Bank: q.Get("bank"),
-		Q:    q.Get("q"),
+		Bank:       strings.TrimSpace(q.Get("bank")),
+		Q:          strings.TrimSpace(q.Get("q")),
+		IFSCPrefix: strings.TrimSpace(q.Get("ifsc")),
+		State:      strings.TrimSpace(q.Get("state")),
+		District:   strings.TrimSpace(q.Get("district")),
+		City:       strings.TrimSpace(q.Get("city")),
 	}
 	if v := q.Get("limit"); v != "" {
 		n, err := strconv.Atoi(v)
