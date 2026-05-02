@@ -17,3 +17,7 @@ clients/typescript/dist-es/
 clients/typescript/dist-types/
 clients/typescript/*.tsbuildinfo
 clients/typescript/package-lock.json
+
+# e2e harness install artifacts
+e2e/typescript/node_modules/
+e2e/typescript/package-lock.json

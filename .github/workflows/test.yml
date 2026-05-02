@@ -20,43 +20,6 @@ jobs:
       - run: go vet ./...
       - run: go test -tags=unit -timeout 2m ./...
 
-      - name: Smoke test built binary
-        run: |
-          set -euo pipefail
-          go build -o /tmp/bank-search .
-          go run ./cmd/build-index -csv ./cmd/build-index/testdata/sample.csv -out /tmp/smoke-index
-
-          BANK_SEARCH_PORT=18080 BANK_SEARCH_INDEX_PATH=/tmp/smoke-index /tmp/bank-search &
-          server_pid=$!
-          trap 'kill $server_pid 2>/dev/null || true' EXIT
-
-          ready=0
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:18080/healthz >/dev/null; then
-              ready=1; break
-            fi
-            sleep 0.5
-          done
-          [ "$ready" = "1" ] || { echo "server did not become ready"; exit 1; }
-
-          curl -sf http://localhost:18080/healthz | grep -q '"status":"ok"'
-          curl -sf http://localhost:18080/status | grep -q '"indexed_docs":'
-          curl -sf 'http://localhost:18080/search?bank=HDFC&q=andheri' | grep -q HDFC0000001
-          curl -sf 'http://localhost:18080/search?ifsc=HDFC0' | grep -q HDFC0000001
-          curl -sf 'http://localhost:18080/search?state=Karnataka' | grep -q HDFC0000003
-          curl -sf 'http://localhost:18080/search?city=Bangalore' | grep -q HDFC0000003
-          curl -sf http://localhost:18080/list | grep -q '"bank_code":"HDFC"'
-          curl -sf http://localhost:18080/list | grep -q '"bank_code":"SBIN"'
-          curl -sf http://localhost:18080/ifsc/HDFC0000001 | grep -q "ANDHERI WEST"
-
-          code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/ifsc/ZZZZ0000000)
-          [ "$code" = "404" ] || { echo "expected 404 got $code"; exit 1; }
-
-          code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/search)
-          [ "$code" = "400" ] || { echo "expected 400 for empty search got $code"; exit 1; }
-
-          echo "smoke ok"
-
   smithy-check:
     runs-on: ubuntu-latest
     steps:
@@ -74,12 +37,50 @@ jobs:
           fi
           echo "smithy ok"
 
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.23"
+          cache: true
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Build the TypeScript client
+
+      - name: Build the TypeScript SDK
         working-directory: clients/typescript
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
           npm run build
+
+      - name: Install e2e harness deps
+        working-directory: e2e/typescript
+        run: npm install --no-audit --no-fund
+
+      - name: Run server + SDK-driven e2e tests
+        env:
+          BANK_SEARCH_PORT: "18080"
+          BANK_SEARCH_INDEX_PATH: "/tmp/smoke-index"
+          BANK_SEARCH_E2E_BASE_URL: "http://localhost:18080"
+        run: |
+          set -euo pipefail
+          go build -o /tmp/bank-search .
+          go run ./cmd/build-index -csv ./cmd/build-index/testdata/sample.csv -out /tmp/smoke-index
+
+          /tmp/bank-search &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:18080/healthz >/dev/null; then
+              ready=1; break
+            fi
+            sleep 0.5
+          done
+          [ "$ready" = "1" ] || { echo "server did not become ready"; exit 1; }
+
+          cd e2e/typescript && npm test

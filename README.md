@@ -144,6 +144,23 @@ curl 'http://localhost:8080/status'
 make test
 ```
 
+`go test` covers the Go side. End-to-end coverage lives in
+`e2e/typescript/smoke.test.ts` and drives a running server through the
+generated TypeScript SDK — exercising serialization, error
+discrimination, and every HTTP route in one pass:
+
+```bash
+# in one shell
+make build-index-from CSV=./cmd/build-index/testdata/sample.csv
+make run
+
+# in another
+cd clients/typescript && npm install && npm run build
+cd ../../e2e/typescript && npm install && npm test
+```
+
+CI's `e2e` job runs this same flow on every PR.
+
 ## API contract (Smithy)
 
 The HTTP contract is modelled in [Smithy 2.0](https://smithy.io) under
