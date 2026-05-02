@@ -144,6 +144,23 @@ curl 'http://localhost:8080/status'
 make test
 ```
 
+## API contract (Smithy)
+
+The HTTP contract is modelled in [Smithy 2.0](https://smithy.io) under
+`smithy/models/` and projected into a committed OpenAPI 3.1 spec at
+`api/openapi.json` plus a Smithy AST at `api/model.json`.
+
+```bash
+make smithy-build       # produces smithy/build/ (gitignored)
+make smithy-publish     # also copies into api/
+make smithy-updates     # clean + publish; CI runs this and gates on no diff
+```
+
+The Go server stays hand-written; Smithy is the source of truth for the
+wire format and lets downstream consumers generate clients from
+`api/openapi.json` (Swagger codegen, openapi-typescript, etc.) or
+`api/model.json` (any smithy-* codegen).
+
 ## Development environment
 
 A `flake.nix` ships a reproducible dev shell with Go, `gopls`,

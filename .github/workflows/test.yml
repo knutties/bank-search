@@ -56,3 +56,20 @@ jobs:
           [ "$code" = "400" ] || { echo "expected 400 for empty search got $code"; exit 1; }
 
           echo "smoke ok"
+
+  smithy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v17
+      - uses: DeterminateSystems/magic-nix-cache-action@v9
+      - name: Regenerate Smithy artifacts and assert no diff
+        run: |
+          set -euo pipefail
+          nix develop --command make smithy-updates
+          if ! git diff --quiet -- api/; then
+            echo "::error::api/ is out of sync with smithy/models — run 'make smithy-updates' and commit the result"
+            git --no-pager diff -- api/
+            exit 1
+          fi
+          echo "smithy ok"
