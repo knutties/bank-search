@@ -34,13 +34,13 @@
                 }
             }
         },
-        "/ifsc/{code}": {
+        "/ifsc/{ifsc}": {
             "get": {
                 "description": "Look up a single branch by IFSC code.",
                 "operationId": "GetBranch",
                 "parameters": [
                     {
-                        "name": "code",
+                        "name": "ifsc",
                         "in": "path",
                         "schema": {
                             "type": "string"
@@ -282,7 +282,6 @@
             },
             "GetBranchResponseContent": {
                 "type": "object",
-                "description": "Full branch record returned by GetBranch.",
                 "properties": {
                     "ifsc": {
                         "type": "string"
@@ -371,7 +370,7 @@
             },
             "ResultItem": {
                 "type": "object",
-                "description": "A search hit: a Branch plus its relevance score.",
+                "description": "A search hit — a Branch's properties plus its relevance score.",
                 "properties": {
                     "ifsc": {
                         "type": "string"

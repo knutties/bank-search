@@ -1008,19 +1008,18 @@
             "version": "2026-05-02",
             "operations": [
                 {
-                    "target": "io.knutties.banksearch#GetBranch"
-                },
-                {
                     "target": "io.knutties.banksearch#Healthz"
                 },
                 {
                     "target": "io.knutties.banksearch#ListBanks"
                 },
                 {
-                    "target": "io.knutties.banksearch#Search"
-                },
-                {
                     "target": "io.knutties.banksearch#Status"
+                }
+            ],
+            "resources": [
+                {
+                    "target": "io.knutties.banksearch#Branch"
                 }
             ],
             "errors": [
@@ -1034,18 +1033,125 @@
             }
         },
         "io.knutties.banksearch#Branch": {
-            "type": "structure",
-            "mixins": [
+            "type": "resource",
+            "identifiers": {
+                "ifsc": {
+                    "target": "smithy.api#String"
+                }
+            },
+            "properties": {
+                "bank_code": {
+                    "target": "smithy.api#String"
+                },
+                "bank_name": {
+                    "target": "smithy.api#String"
+                },
+                "branch": {
+                    "target": "smithy.api#String"
+                },
+                "centre": {
+                    "target": "smithy.api#String"
+                },
+                "district": {
+                    "target": "smithy.api#String"
+                },
+                "state": {
+                    "target": "smithy.api#String"
+                },
+                "address": {
+                    "target": "smithy.api#String"
+                },
+                "city": {
+                    "target": "smithy.api#String"
+                },
+                "contact": {
+                    "target": "smithy.api#String"
+                },
+                "micr": {
+                    "target": "smithy.api#String"
+                },
+                "swift": {
+                    "target": "smithy.api#String"
+                },
+                "upi": {
+                    "target": "smithy.api#Boolean"
+                },
+                "neft": {
+                    "target": "smithy.api#Boolean"
+                },
+                "rtgs": {
+                    "target": "smithy.api#Boolean"
+                },
+                "imps": {
+                    "target": "smithy.api#Boolean"
+                }
+            },
+            "read": {
+                "target": "io.knutties.banksearch#GetBranch"
+            },
+            "collectionOperations": [
                 {
-                    "target": "io.knutties.banksearch#BranchFields"
+                    "target": "io.knutties.banksearch#Search"
                 }
             ],
-            "members": {},
             "traits": {
-                "smithy.api#documentation": "Full branch record returned by GetBranch."
+                "smithy.api#documentation": "A bank branch keyed by its IFSC code. The properties are the wire\nfields exposed by every operation that returns a branch."
             }
         },
-        "io.knutties.banksearch#BranchFields": {
+        "io.knutties.banksearch#BranchNotFound": {
+            "type": "structure",
+            "members": {
+                "error": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                }
+            },
+            "traits": {
+                "smithy.api#error": "client",
+                "smithy.api#httpError": 404
+            }
+        },
+        "io.knutties.banksearch#GetBranch": {
+            "type": "operation",
+            "input": {
+                "target": "io.knutties.banksearch#GetBranchInput"
+            },
+            "output": {
+                "target": "io.knutties.banksearch#GetBranchOutput"
+            },
+            "errors": [
+                {
+                    "target": "io.knutties.banksearch#BranchNotFound"
+                }
+            ],
+            "traits": {
+                "smithy.api#documentation": "Look up a single branch by IFSC code.",
+                "smithy.api#http": {
+                    "method": "GET",
+                    "uri": "/ifsc/{ifsc}",
+                    "code": 200
+                },
+                "smithy.api#readonly": {}
+            }
+        },
+        "io.knutties.banksearch#GetBranchInput": {
+            "type": "structure",
+            "members": {
+                "ifsc": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#httpLabel": {},
+                        "smithy.api#required": {}
+                    }
+                }
+            },
+            "traits": {
+                "smithy.api#input": {}
+            }
+        },
+        "io.knutties.banksearch#GetBranchOutput": {
             "type": "structure",
             "members": {
                 "ifsc": {
@@ -1110,61 +1216,7 @@
                 }
             },
             "traits": {
-                "smithy.api#documentation": "Mixin holding the common bank-branch fields. Both the Branch lookup\nresponse and a Search result item carry these.",
-                "smithy.api#mixin": {}
-            }
-        },
-        "io.knutties.banksearch#BranchNotFound": {
-            "type": "structure",
-            "members": {
-                "error": {
-                    "target": "smithy.api#String",
-                    "traits": {
-                        "smithy.api#required": {}
-                    }
-                }
-            },
-            "traits": {
-                "smithy.api#error": "client",
-                "smithy.api#httpError": 404
-            }
-        },
-        "io.knutties.banksearch#GetBranch": {
-            "type": "operation",
-            "input": {
-                "target": "io.knutties.banksearch#GetBranchInput"
-            },
-            "output": {
-                "target": "io.knutties.banksearch#Branch"
-            },
-            "errors": [
-                {
-                    "target": "io.knutties.banksearch#BranchNotFound"
-                }
-            ],
-            "traits": {
-                "smithy.api#documentation": "Look up a single branch by IFSC code.",
-                "smithy.api#http": {
-                    "method": "GET",
-                    "uri": "/ifsc/{code}",
-                    "code": 200
-                },
-                "smithy.api#readonly": {}
-            }
-        },
-        "io.knutties.banksearch#GetBranchInput": {
-            "type": "structure",
-            "members": {
-                "code": {
-                    "target": "smithy.api#String",
-                    "traits": {
-                        "smithy.api#httpLabel": {},
-                        "smithy.api#required": {}
-                    }
-                }
-            },
-            "traits": {
-                "smithy.api#input": {}
+                "smithy.api#output": {}
             }
         },
         "io.knutties.banksearch#Healthz": {
@@ -1239,12 +1291,67 @@
         },
         "io.knutties.banksearch#ResultItem": {
             "type": "structure",
-            "mixins": [
-                {
-                    "target": "io.knutties.banksearch#BranchFields"
-                }
-            ],
             "members": {
+                "ifsc": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "bank_code": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "bank_name": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "branch": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "centre": {
+                    "target": "smithy.api#String"
+                },
+                "district": {
+                    "target": "smithy.api#String"
+                },
+                "state": {
+                    "target": "smithy.api#String"
+                },
+                "address": {
+                    "target": "smithy.api#String"
+                },
+                "city": {
+                    "target": "smithy.api#String"
+                },
+                "contact": {
+                    "target": "smithy.api#String"
+                },
+                "micr": {
+                    "target": "smithy.api#String"
+                },
+                "swift": {
+                    "target": "smithy.api#String"
+                },
+                "upi": {
+                    "target": "smithy.api#Boolean"
+                },
+                "neft": {
+                    "target": "smithy.api#Boolean"
+                },
+                "rtgs": {
+                    "target": "smithy.api#Boolean"
+                },
+                "imps": {
+                    "target": "smithy.api#Boolean"
+                },
                 "score": {
                     "target": "smithy.api#Double",
                     "traits": {
@@ -1253,7 +1360,7 @@
                 }
             },
             "traits": {
-                "smithy.api#documentation": "A search hit: a Branch plus its relevance score."
+                "smithy.api#documentation": "A search hit — a Branch's properties plus its relevance score."
             }
         },
         "io.knutties.banksearch#ResultItemList": {
@@ -1268,7 +1375,7 @@
                 "target": "io.knutties.banksearch#SearchInput"
             },
             "output": {
-                "target": "io.knutties.banksearch#SearchResults"
+                "target": "io.knutties.banksearch#SearchOutput"
             },
             "errors": [
                 {
@@ -1349,7 +1456,7 @@
                 "smithy.api#input": {}
             }
         },
-        "io.knutties.banksearch#SearchResults": {
+        "io.knutties.banksearch#SearchOutput": {
             "type": "structure",
             "members": {
                 "total": {
@@ -1376,6 +1483,9 @@
                         "smithy.api#required": {}
                     }
                 }
+            },
+            "traits": {
+                "smithy.api#output": {}
             }
         },
         "io.knutties.banksearch#Status": {

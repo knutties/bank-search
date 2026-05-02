@@ -71,7 +71,7 @@ func newRouter(s search.Searcher, v search.Version, prefix string, accessLog io.
 	mux.HandleFunc(prefix+"/healthz", handleHealthz())
 	mux.HandleFunc(prefix+"/status", handleStatus(s, v))
 	mux.HandleFunc("GET "+prefix+"/list", handleListBanks(s))
-	mux.HandleFunc("GET "+prefix+"/ifsc/{code}", handleLookup(s))
+	mux.HandleFunc("GET "+prefix+"/ifsc/{ifsc}", handleLookup(s))
 	if accessLog == nil {
 		return mux
 	}
@@ -202,8 +202,8 @@ func parseRequest(r *http.Request) (search.SearchRequest, error) {
 
 func handleLookup(s search.Searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		code := r.PathValue("code")
-		br, err := s.Lookup(code)
+		ifsc := r.PathValue("ifsc")
+		br, err := s.Lookup(ifsc)
 		if err != nil {
 			if errors.Is(err, search.ErrNotFound) {
 				writeError(w, http.StatusNotFound, "ifsc code not found")

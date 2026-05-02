@@ -8,10 +8,9 @@ use aws.protocols#restJson1
 @restJson1
 service BankSearch {
     version: "2026-05-02"
+    resources: [Branch]
     operations: [
-        Search
         ListBanks
-        GetBranch
         Healthz
         Status
     ]

@@ -41,31 +41,39 @@ operation Search {
         offset: Integer
     }
 
-    output: SearchResults
+    output := {
+        @required total: Integer
+        @required limit: Integer
+        @required offset: Integer
+        @required results: ResultItemList
+    }
 
     errors: [BadRequest]
-}
-
-structure SearchResults {
-    @required
-    total: Integer
-
-    @required
-    limit: Integer
-
-    @required
-    offset: Integer
-
-    @required
-    results: ResultItemList
 }
 
 list ResultItemList {
     member: ResultItem
 }
 
-/// A search hit: a Branch plus its relevance score.
-structure ResultItem with [BranchFields] {
+/// A search hit — a Branch's properties plus its relevance score.
+structure ResultItem for Branch {
+    @required $ifsc
+    @required $bank_code
+    @required $bank_name
+    @required $branch
+    $centre
+    $district
+    $state
+    $address
+    $city
+    $contact
+    $micr
+    $swift
+    $upi
+    $neft
+    $rtgs
+    $imps
+
     @required
     score: Double
 }
