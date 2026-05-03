@@ -27,9 +27,12 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Compute calver tag
+      - name: Compute calver tag from commit timestamp
         id: ver
-        run: echo "tag=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
+        # Derived from the commit's committer time (UTC) so this workflow
+        # and image.yml emit the same calver for the same SHA, and
+        # re-runs on the same SHA stay idempotent.
+        run: echo "tag=$(TZ=UTC0 git log -1 --format=%cd --date=format-local:%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
 
       - name: Bump in-tarball version to <base>-<calver>
         id: pkg
