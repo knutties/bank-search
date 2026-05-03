@@ -148,6 +148,56 @@ try {
 }
 ```
 
+## Examples
+
+```ts
+import {
+  BankSearchClient,
+  BadRequest,
+  ListBanksCommand,
+  SearchCommand,
+} from "@knutties/bank-search-client";
+
+const client = new BankSearchClient({ endpoint: "https://your-bank-search-host" });
+```
+
+### List banks
+
+`ListBanks` returns every bank in the index, sorted by `bank_code`.
+
+```ts
+const { total, banks } = await client.send(new ListBanksCommand({}));
+for (const b of banks ?? []) {
+  console.log(b.bank_code, b.bank_name);
+}
+```
+
+### Search branches
+
+`Search` accepts any combination of `bank`, `q`, `ifsc`, `city`, `state`, `district` — at least one signal is required, otherwise the server returns `BadRequest`. String matches are case-insensitive. Results are paginated via `limit` (default 20, max 100) and `offset`.
+
+```ts
+// Branches at "HDFC ... Andheri ..."
+const { total, results } = await client.send(
+  new SearchCommand({ bank: "HDFC", q: "andheri" }),
+);
+for (const r of results ?? []) {
+  console.log(r.ifsc, r.branch, r.city);
+}
+
+// All branches in a state — strict, case-insensitive.
+const karnataka = await client.send(
+  new SearchCommand({ state: "Karnataka", limit: 50 }),
+);
+
+// Empty Search throws BadRequest.
+try {
+  await client.send(new SearchCommand({}));
+} catch (err) {
+  if (!(err instanceof BadRequest)) throw err;
+}
+```
+
 ## Getting Help
 
 Please [open an issue](https://github.com/knutties/bank-search/issues) on the bank-search repo for bugs or feature requests.
