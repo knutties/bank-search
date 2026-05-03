@@ -80,10 +80,12 @@ const files = [
                     "```sh\n" +
                     "# latest release:\n" +
                     "npm install https://github.com/knutties/bank-search/releases/latest/download/bank-search-client.tgz\n\n" +
-                    "# pinned to a specific calver:\n" +
-                    "npm install https://github.com/knutties/bank-search/releases/download/v202605031200/bank-search-client.tgz\n" +
+                    "# pinned to a specific release (replace vYYYYMMDDHHMM with a tag from the releases page):\n" +
+                    "npm install https://github.com/knutties/bank-search/releases/download/vYYYYMMDDHHMM/bank-search-client.tgz\n" +
                     "```\n\n" +
-                    "`yarn add` / `pnpm add` accept the same tarball URL.\n",
+                    "`yarn add` / `pnpm add` accept the same tarball URL.\n\n" +
+                    "Each release ships with the in-tarball version suffixed by the calver " +
+                    "(e.g. `0.1.0-202605031200`) so lockfiles can pin a specific build.\n",
             },
             {
                 label: "\"AWS SDK is modulized\" intro",
