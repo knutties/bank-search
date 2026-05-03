@@ -42,7 +42,7 @@ export interface ListBanksCommandOutput extends ListBanksOutput, __MetadataBeare
  * // { // ListBanksOutput
  * //   total: Number("int"), // required
  * //   banks: [ // BankList // required
- * //     { // Bank
+ * //     { // BankSummary
  * //       bank_code: "STRING_VALUE", // required
  * //       bank_name: "STRING_VALUE", // required
  * //     },

@@ -1928,26 +1928,23 @@
             }
         },
         "io.knutties.banksearch#Bank": {
-            "type": "structure",
-            "members": {
+            "type": "resource",
+            "identifiers": {
                 "bank_code": {
-                    "target": "smithy.api#String",
-                    "traits": {
-                        "smithy.api#required": {}
-                    }
-                },
-                "bank_name": {
-                    "target": "smithy.api#String",
-                    "traits": {
-                        "smithy.api#required": {}
-                    }
+                    "target": "smithy.api#String"
                 }
+            },
+            "list": {
+                "target": "io.knutties.banksearch#ListBanks"
+            },
+            "traits": {
+                "smithy.api#documentation": "A bank registered with the index. Identified by its 4-char IFSC bank\ncode. Today the only bound operation is List; future Get/Put/Delete\nwill hang off this resource without changing existing URLs."
             }
         },
         "io.knutties.banksearch#BankList": {
             "type": "list",
             "member": {
-                "target": "io.knutties.banksearch#Bank"
+                "target": "io.knutties.banksearch#BankSummary"
             }
         },
         "io.knutties.banksearch#BankSearch": {
@@ -1958,13 +1955,13 @@
                     "target": "io.knutties.banksearch#Healthz"
                 },
                 {
-                    "target": "io.knutties.banksearch#ListBanks"
-                },
-                {
                     "target": "io.knutties.banksearch#Status"
                 }
             ],
             "resources": [
+                {
+                    "target": "io.knutties.banksearch#Bank"
+                },
                 {
                     "target": "io.knutties.banksearch#Branch"
                 }
@@ -2000,6 +1997,26 @@
                         }
                     ]
                 }
+            }
+        },
+        "io.knutties.banksearch#BankSummary": {
+            "type": "structure",
+            "members": {
+                "bank_code": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "bank_name": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                }
+            },
+            "traits": {
+                "smithy.api#documentation": "Wire shape for a bank in the listing."
             }
         },
         "io.knutties.banksearch#Branch": {

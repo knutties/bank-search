@@ -38,9 +38,8 @@ use smithy.rules#endpointRuleSet
 )
 service BankSearch {
     version: "2026-05-02"
-    resources: [Branch]
+    resources: [Branch, Bank]
     operations: [
-        ListBanks
         Healthz
         Status
     ]

@@ -1,10 +1,19 @@
 // smithy-typescript generated code
 /**
+ * Wire shape for a bank in the listing.
  * @public
  */
-export interface Bank {
+export interface BankSummary {
   bank_code: string | undefined;
   bank_name: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface ListBanksOutput {
+  total: number | undefined;
+  banks: BankSummary[] | undefined;
 }
 
 /**
@@ -128,14 +137,6 @@ export interface SearchOutput {
  */
 export interface HealthzOutput {
   status: string | undefined;
-}
-
-/**
- * @public
- */
-export interface ListBanksOutput {
-  total: number | undefined;
-  banks: Bank[] | undefined;
 }
 
 /**

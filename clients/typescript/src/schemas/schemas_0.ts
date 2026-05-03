@@ -1,7 +1,7 @@
-const _B = "Bank";
 const _BL = "BankList";
 const _BNF = "BranchNotFound";
 const _BR = "BadRequest";
+const _BS = "BankSummary";
 const _GB = "GetBranch";
 const _GBI = "GetBranchInput";
 const _GBO = "GetBranchOutput";
@@ -86,7 +86,7 @@ export const errorTypeRegistries = [
   _s_registry,
   n0_registry,
 ]
-export var Bank$: StaticStructureSchema = [3, n0, _B,
+export var BankSummary$: StaticStructureSchema = [3, n0, _BS,
   0,
   [_bc, _bn],
   [0, 0], 2
@@ -133,7 +133,7 @@ export var StatusOutput$: StaticStructureSchema = [3, n0, _SOt,
 ];
 var __Unit = "unit" as const;
 var BankList: StaticListSchema = [1, n0, _BL,
-  0, () => Bank$
+  0, () => BankSummary$
 ];
 var ResultItemList: StaticListSchema = [1, n0, _RIL,
   0, () => ResultItem$
